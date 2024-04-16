@@ -8,6 +8,5 @@
 ![](https://eips.ethereum.org/assets/eip-6551/diagram.png)
 
 ## API Reference
-
-
+[Interface Doc](https://github.com/Yuri-Protocol/go-sdk/blob/main/Interface.md)
 ## Installation & Examples
