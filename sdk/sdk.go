@@ -29,6 +29,7 @@ import (
 	"github.com/ethereum/go-ethereum/crypto"
 	"github.com/ethereum/go-ethereum/ethclient"
 	"github.com/xcodespace/go-sdk/erc_6551"
+	"github.com/xcodespace/go-sdk/utils"
 )
 
 type Erc6551Sdk struct {
@@ -41,7 +42,7 @@ type Erc6551Sdk struct {
 	chainID              *big.Int
 }
 
-func (this *Erc6551Sdk) NewErc6551Sdk(privateKey *ecdsa.PrivateKey, nft721ContractAddr, registryContractAddr,
+func NewErc6551Sdk(privateKey *ecdsa.PrivateKey, nft721ContractAddr, registryContractAddr,
 	accountContractAddr common.Address, rpcUrl string, chainID *big.Int) (*Erc6551Sdk, error) {
 	rpcClient, err := ethclient.Dial(rpcUrl)
 	if err != nil {
@@ -76,7 +77,7 @@ func (this *Erc6551Sdk) Mint721Nft(tokenId *big.Int, uri string) (*types.Transac
 	return erc721Nft.Mint(transactOpts, tokenId, uri)
 }
 
-//computes the token bound account address
+// computes the token bound account address
 func (this *Erc6551Sdk) Account(tokenId *big.Int) (common.Address, error) {
 	registry, err := erc_6551.NewERC6551Registry(this.registryContractAddr, this.rpcClient)
 	if err != nil {
@@ -104,4 +105,35 @@ func (this *Erc6551Sdk) CreateAccount(tokenId *big.Int) (*types.Transaction, err
 	transactOpts.Nonce = big.NewInt(int64(addrNonce))
 	transactOpts.Value = big.NewInt(0)
 	return registry.CreateAccount(transactOpts, this.accountContractAddr, salt, this.chainID, this.nft721ContractAddr, tokenId)
+}
+
+func (this *Erc6551Sdk) Transfer(tokenAddr, tbaAddr, toAddr common.Address, value *big.Int) (*types.Transaction, error) {
+	erc6551Account, err := erc_6551.NewERC6551Account(tbaAddr, this.rpcClient)
+	if err != nil {
+		return nil, err
+	}
+	transactOpts, err := bind.NewKeyedTransactorWithChainID(this.privateKey, this.chainID)
+	if err != nil {
+		return nil, err
+	}
+	addrNonce, err := this.rpcClient.PendingNonceAt(context.Background(), this.address)
+	if err != nil {
+		return nil, err
+	}
+	transactOpts.From = this.address
+	transactOpts.Nonce = big.NewInt(int64(addrNonce))
+	transactOpts.Value = big.NewInt(0)
+	if tokenAddr == common.HexToAddress(utils.NullAddr) {
+		transfer, err := erc6551Account.Execute(transactOpts, toAddr, value, nil, 0)
+		if err != nil {
+			return nil, err
+		}
+		return transfer, nil
+	} else {
+		transfer, err := erc6551Account.TransferToken(transactOpts, tokenAddr, toAddr, value)
+		if err != nil {
+			return nil, err
+		}
+		return transfer, nil
+	}
 }
