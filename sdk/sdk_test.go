@@ -78,3 +78,13 @@ func TestTransferErc20Token(t *testing.T) {
 	assert.Nil(t, err)
 	t.Logf("txHash:%s", transfer.Hash().String())
 }
+
+func TestErc6551Sdk_TransferNft(t *testing.T) {
+	erc6551Sdk, err := NewSdk()
+	assert.Nil(t, err)
+	toAddr := common.HexToAddress("")
+	tokenId := big.NewInt(1)
+	transfer, err := erc6551Sdk.TransferNft(toAddr, tokenId)
+	assert.Nil(t, err)
+	t.Logf("txHash:%s", transfer.Hash().String())
+}

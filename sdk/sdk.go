@@ -137,3 +137,26 @@ func (this *Erc6551Sdk) Transfer(tokenAddr, tbaAddr, toAddr common.Address, valu
 		return transfer, nil
 	}
 }
+
+func (this *Erc6551Sdk) TransferNft(toAddr common.Address, tokenId *big.Int) (*types.Transaction, error) {
+	erc721, err := erc_6551.NewERC721Asset(this.nft721ContractAddr, this.rpcClient)
+	if err != nil {
+		return nil, err
+	}
+	transactOpts, err := bind.NewKeyedTransactorWithChainID(this.privateKey, this.chainID)
+	if err != nil {
+		return nil, err
+	}
+	addrNonce, err := this.rpcClient.PendingNonceAt(context.Background(), this.address)
+	if err != nil {
+		return nil, err
+	}
+	transactOpts.From = this.address
+	transactOpts.Nonce = big.NewInt(int64(addrNonce))
+	transactOpts.Value = big.NewInt(0)
+	transfer, err := erc721.SafeTransferFrom(transactOpts, this.address, toAddr, tokenId)
+	if err != nil {
+		return nil, err
+	}
+	return transfer, nil
+}
