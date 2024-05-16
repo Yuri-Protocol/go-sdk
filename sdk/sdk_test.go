@@ -28,16 +28,20 @@ import (
 )
 
 func NewSdk() (*Erc6551Sdk, error) {
-	return NewErc6551Sdk(nil, common.HexToAddress(""),
-		common.HexToAddress(""),
-		common.HexToAddress(""),
-		"https://bsc-testnet-rpc.publicnode.com",
+	privateKey, _, err := utils.GetPrivateKey("")
+	if err != nil {
+		return nil, err
+	}
+	return NewErc6551Sdk(privateKey, common.HexToAddress("0xA8Be291B81A08166c4A698359b72E6b66a8b054c"),
+		common.HexToAddress("0x9F71299ba4322bc449acd75b4Cd8C3776Ef09e24"),
+		common.HexToAddress("0x69339d5048dBd6C46A6AAFCb1E4457C4dD678450"),
+		"https://data-seed-prebsc-1-s2.bnbchain.org:8545",
 		big.NewInt(97))
 }
 func TestMint721Nft(t *testing.T) {
 	erc6551Sdk, err := NewSdk()
 	assert.Nil(t, err)
-	transfer, err := erc6551Sdk.Mint721Nft(big.NewInt(1), "")
+	transfer, err := erc6551Sdk.Mint721Nft(big.NewInt(5), "")
 	assert.Nil(t, err)
 	t.Logf("txHash:%s", transfer.Hash().String())
 }
@@ -45,7 +49,8 @@ func TestMint721Nft(t *testing.T) {
 func TestComputeAccAddr(t *testing.T) {
 	erc6551Sdk, err := NewSdk()
 	assert.Nil(t, err)
-	tblAddr, err := erc6551Sdk.Account(big.NewInt(1))
+	tokenId := big.NewInt(5)
+	tblAddr, err := erc6551Sdk.Account(tokenId)
 	assert.Nil(t, err)
 	t.Logf("tblAddr:%s", tblAddr.String())
 }
@@ -53,7 +58,8 @@ func TestComputeAccAddr(t *testing.T) {
 func TestCreateAccount(t *testing.T) {
 	erc6551Sdk, err := NewSdk()
 	assert.Nil(t, err)
-	transfer, err := erc6551Sdk.CreateAccount(big.NewInt(1))
+	tokenId := big.NewInt(5)
+	transfer, err := erc6551Sdk.CreateAccount(tokenId)
 	assert.Nil(t, err)
 	t.Logf("txHash:%s", transfer.Hash().String())
 }
@@ -61,9 +67,9 @@ func TestCreateAccount(t *testing.T) {
 func TestTransferNativeToken(t *testing.T) {
 	erc6551Sdk, err := NewSdk()
 	assert.Nil(t, err)
-	tblAddr := common.HexToAddress("")
-	toAddr := common.HexToAddress("")
-	transfer, err := erc6551Sdk.Transfer(common.HexToAddress(utils.NullAddr), tblAddr, toAddr, big.NewInt(1000))
+	tblAddr := common.HexToAddress("0x8DA2136FcE19e0FAd3C2364B2c696A2951Ef5d32")
+	toAddr := common.HexToAddress("0xd1b9cef657ed8a2159171ddDa2085EFBf4e3A2aB")
+	transfer, err := erc6551Sdk.Transfer(common.HexToAddress(utils.NullAddr), tblAddr, toAddr, big.NewInt(700000))
 	assert.Nil(t, err)
 	t.Logf("txHash:%s", transfer.Hash().String())
 }
@@ -73,8 +79,8 @@ func TestTransferErc20Token(t *testing.T) {
 	assert.Nil(t, err)
 	ercTokenAddr := common.HexToAddress("")
 	tblAddr := common.HexToAddress("")
-	toAddr := common.HexToAddress("")
-	transfer, err := erc6551Sdk.Transfer(ercTokenAddr, tblAddr, toAddr, big.NewInt(1000))
+	toAddr := common.HexToAddress("0xd1b9cef657ed8a2159171ddDa2085EFBf4e3A2aB")
+	transfer, err := erc6551Sdk.Transfer(ercTokenAddr, tblAddr, toAddr, big.NewInt(60000000))
 	assert.Nil(t, err)
 	t.Logf("txHash:%s", transfer.Hash().String())
 }
@@ -82,8 +88,8 @@ func TestTransferErc20Token(t *testing.T) {
 func TestErc6551Sdk_TransferNft(t *testing.T) {
 	erc6551Sdk, err := NewSdk()
 	assert.Nil(t, err)
-	toAddr := common.HexToAddress("")
-	tokenId := big.NewInt(1)
+	toAddr := common.HexToAddress("0xd1b9cef657ed8a2159171ddDa2085EFBf4e3A2aB")
+	tokenId := big.NewInt(5)
 	transfer, err := erc6551Sdk.TransferNft(toAddr, tokenId)
 	assert.Nil(t, err)
 	t.Logf("txHash:%s", transfer.Hash().String())
